@@ -1,13 +1,26 @@
 import 'hardhat/types/config';
 import 'hardhat/types/runtime';
 import '@nomiclabs/hardhat-ethers/types';
+import type * as ethers from 'ethers';
+import type {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
 
-// declare module 'hardhat/types/config' {}
+import type {getContractFactoryWithSignerAddress} from './types';
 
 declare module '@nomiclabs/hardhat-ethers/types' {
-  // This is an example of an extension to the Hardhat Runtime Environment.
-  // This new field will be available in tasks' actions, scripts, and tests.
   interface HardhatEthersHelpers {
-    b: () => number;
+    getContractFactoryWithSignerAddress: typeof getContractFactoryWithSignerAddress;
+    getContractAtWithSignerAddress: (
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      nameOrAbi: string | any[],
+      address: string,
+      signer: string
+    ) => Promise<ethers.Contract>;
+    getSignerOrNull: (address: string) => Promise<SignerWithAddress | null>;
+    getNamedSigners: () => Promise<Record<string, SignerWithAddress>>;
+    getNamedSigner: (name: string) => Promise<SignerWithAddress>;
+    getNamedSignerOrNull: (name: string) => Promise<SignerWithAddress | null>;
+    getUnnamedSigners: () => Promise<SignerWithAddress[]>;
+    getContract: (name: string, signer?: ethers.Signer | string) => Promise<ethers.Contract>;
+    getContractOrNull: (name: string, signer?: ethers.Signer | string) => Promise<ethers.Contract | null>;
   }
 }
