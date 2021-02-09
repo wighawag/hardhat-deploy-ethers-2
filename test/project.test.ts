@@ -1,30 +1,13 @@
 import {assert} from 'chai';
 
-import {ExampleHardhatRuntimeEnvironmentField} from '../src/ExampleHardhatRuntimeEnvironmentField';
-
 import {useEnvironment} from './helpers';
 
 describe('Integration tests examples', function () {
   describe('Hardhat Runtime Environment extension', function () {
     useEnvironment('hardhat-project');
 
-    it('It should add the example field', function () {
-      assert.instanceOf(this.env.example, ExampleHardhatRuntimeEnvironmentField);
-    });
-
-    it('The example filed should say hello', function () {
-      assert.equal(this.env.example.sayHello(), 'hello');
-    });
-  });
-});
-
-describe('Unit tests examples', function () {
-  describe('ExampleHardhatRuntimeEnvironmentField', function () {
-    describe('sayHello', function () {
-      it('Should say hello', function () {
-        const field = new ExampleHardhatRuntimeEnvironmentField();
-        assert.equal(field.sayHello(), 'hello');
-      });
+    it('It should add the b field to ethers', function () {
+      assert.isNumber(this.env.ethers.b());
     });
   });
 });

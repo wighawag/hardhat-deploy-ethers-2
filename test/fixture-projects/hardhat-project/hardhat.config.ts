@@ -1,4 +1,4 @@
-// We load the plugin here.
+import '@nomiclabs/hardhat-ethers';
 import '../../../src/index';
 
 import {HardhatUserConfig} from 'hardhat/types';

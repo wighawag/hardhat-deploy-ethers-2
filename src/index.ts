@@ -1,12 +1,19 @@
 import {extendEnvironment} from 'hardhat/config';
-import {lazyObject} from 'hardhat/plugins';
 import './type-extensions';
+import {lazyObject} from 'hardhat/plugins';
+import '@nomiclabs/hardhat-ethers';
 
-import {ExampleHardhatRuntimeEnvironmentField} from './ExampleHardhatRuntimeEnvironmentField';
+extendEnvironment((hre) => {
+  const prevEthers = hre.ethers;
+  hre.ethers = lazyObject(() => {
+    prevEthers.b = () => 1;
+    return prevEthers;
+  });
+  // getSigner: (address: string) => getSigner(hre, address),
+  // getSigners: () => getSigners(hre),
 
-extendEnvironment((env) => {
-  // We add a field to the Hardhat Runtime Environment here.
-  // We use lazyObject to avoid initializing things until they are actually
-  // needed.
-  env.example = lazyObject(() => new ExampleHardhatRuntimeEnvironmentField());
+  // We cast to any here as we hit a limitation of Function#bind and
+  // overloads. See: https://github.com/microsoft/TypeScript/issues/28582
+  // getContractFactory: getContractFactory.bind(null, hre) as any,
+  // getContractAt: getContractAt.bind(null, hre),
 });
