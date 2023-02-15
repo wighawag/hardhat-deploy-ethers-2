@@ -1,7 +1,9 @@
-import {extendEnvironment} from 'hardhat/config';
+import {extendEnvironment, extendArtifacts} from 'hardhat/config';
 import './type-extensions';
 import {lazyObject} from 'hardhat/plugins';
 import '@nomiclabs/hardhat-ethers';
+import { HardhatDeployArtifactsSource } from "./artifacts-source";
+
 
 import {
   getContractFactoryWithSignerAddress,
@@ -15,7 +17,15 @@ import {
   getContractOrNull,
 } from './helpers';
 
+
+const newSource = new HardhatDeployArtifactsSource();
+extendArtifacts(
+  (config) => newSource
+);
+
 extendEnvironment((hre) => {
+  
+  newSource.setHRE(hre);
   const prevEthers = hre.ethers;
   hre.ethers = lazyObject(() => {
     // We cast to any here as we hit a limitation of Function#bind and
