@@ -1,8 +1,7 @@
-import {extendEnvironment, extendArtifacts} from 'hardhat/config';
+import {extendEnvironment} from 'hardhat/config';
 import './type-extensions';
 import {lazyObject} from 'hardhat/plugins';
-import '@nomiclabs/hardhat-ethers';
-import { HardhatDeployArtifactsSource } from "./artifacts-source";
+import '@nomicfoundation/hardhat-ethers';
 
 
 import {
@@ -16,30 +15,25 @@ import {
   getContract,
   getContractOrNull,
 } from './helpers';
+import { ethers } from 'ethers';
 
 
-const newSource = new HardhatDeployArtifactsSource();
-extendArtifacts(
-  (config) => newSource
-);
 
-extendEnvironment((hre) => {
-  
-  newSource.setHRE(hre);
+extendEnvironment((hre) => {  
   const prevEthers = hre.ethers;
   hre.ethers = lazyObject(() => {
     // We cast to any here as we hit a limitation of Function#bind and
     // overloads. See: https://github.com/microsoft/TypeScript/issues/28582
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     prevEthers.getContractFactoryWithSignerAddress = getContractFactoryWithSignerAddress.bind(null, hre) as any;
-    prevEthers.getContractAtWithSignerAddress = getContractAtWithSignerAddress.bind(null, hre);
+    prevEthers.getContractAtWithSignerAddress = ( nameOrAbi: string | any[],address: string, signer: string) => getContractAtWithSignerAddress(hre, nameOrAbi, address, signer);
     prevEthers.getSignerOrNull = (address) => getSignerOrNull(hre, address);
     prevEthers.getNamedSigners = () => getNamedSigners(hre);
     prevEthers.getNamedSigner = (name) => getNamedSigner(hre, name);
     prevEthers.getNamedSignerOrNull = (name) => getNamedSignerOrNull(hre, name);
     prevEthers.getUnnamedSigners = () => getUnnamedSigners(hre);
-    prevEthers.getContract = getContract.bind(null, hre);
-    prevEthers.getContractOrNull = getContractOrNull.bind(null, hre);
+    prevEthers.getContract = (name: string, signer?: ethers.Signer | string) => getContract(hre, name, signer);
+    prevEthers.getContractOrNull = (name: string, signer?: ethers.Signer | string) => getContractOrNull(hre, name, signer);
     return prevEthers;
   });
 });

@@ -1,6 +1,6 @@
 import type {ethers} from 'ethers';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import type {SignerWithAddress} from '@nomiclabs/hardhat-ethers/signers';
+import type {SignerWithAddress} from '@nomicfoundation/hardhat-ethers/signers';
 import {FactoryOptionsWithSignerAddress} from './types';
 
 export function getContractFactoryWithSignerAddress(
@@ -13,7 +13,7 @@ export function getContractFactoryWithSignerAddress(
   hre: HardhatRuntimeEnvironment,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   abi: any[],
-  bytecode: ethers.utils.BytesLike,
+  bytecode: ethers.BytesLike,
   signer: string
 ): Promise<ethers.ContractFactory>;
 
@@ -21,7 +21,7 @@ export async function getContractFactoryWithSignerAddress(
   hre: HardhatRuntimeEnvironment,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   nameOrAbi: string | any[],
-  bytecodeOrFactoryOptions?: (string | FactoryOptionsWithSignerAddress) | ethers.utils.BytesLike,
+  bytecodeOrFactoryOptions?: (string | FactoryOptionsWithSignerAddress) | ethers.BytesLike,
   signer?: string
 ): Promise<ethers.ContractFactory> {
   let actualSigner: SignerWithAddress;
@@ -38,18 +38,18 @@ export async function getContractFactoryWithSignerAddress(
     });
   }
   actualSigner = await hre.ethers.getSigner(signer as string);
-  return hre.ethers.getContractFactory(nameOrAbi, bytecodeOrFactoryOptions as ethers.utils.BytesLike, actualSigner);
+  return hre.ethers.getContractFactory(nameOrAbi, bytecodeOrFactoryOptions as ethers.BytesLike, actualSigner);
 }
 
-export async function getContractAtWithSignerAddress(
+export async function getContractAtWithSignerAddress<ContractType extends ethers.BaseContract = ethers.BaseContract>(
   hre: HardhatRuntimeEnvironment,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   nameOrAbi: string | any[],
   address: string,
   signer: string
-): Promise<ethers.Contract> {
+): Promise<ContractType> {
   const actualSigner = await hre.ethers.getSigner(signer);
-  return hre.ethers.getContractAt(nameOrAbi, address, actualSigner);
+  return hre.ethers.getContractAt(nameOrAbi, address, actualSigner) as unknown as ContractType;
 }
 
 export async function getSignerOrNull(
@@ -139,23 +139,23 @@ export async function getUnnamedSigners(hre: HardhatRuntimeEnvironment): Promise
   throw new Error(`No Deployment Plugin Installed, try 'import "harhdat-deploy"'`);
 }
 
-export async function getContract(
+export async function getContract<ContractType extends ethers.BaseContract = ethers.BaseContract>(
   hre: HardhatRuntimeEnvironment,
   name: string,
   signer?: ethers.Signer | string
-): Promise<ethers.Contract> {
+): Promise<ContractType> {
   const contract = await getContractOrNull(hre, name, signer);
   if (contract === null) {
     throw new Error(`No Contract deployed with name: ${name}`);
   }
-  return contract;
+  return contract as unknown as ContractType;
 }
 
-export async function getContractOrNull(
+export async function getContractOrNull<ContractType extends ethers.BaseContract = ethers.BaseContract>(
   hre: HardhatRuntimeEnvironment,
   name: string,
   signer?: ethers.Signer | string
-): Promise<ethers.Contract | null> {
+): Promise<ContractType | null> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const deployments = (hre as any).deployments;
   if (deployments !== undefined) {
@@ -166,9 +166,9 @@ export async function getContractOrNull(
       return null;
     }
     if (typeof signer === 'string') {
-      return getContractAtWithSignerAddress(hre, contract.abi, contract.address, signer);
+      return getContractAtWithSignerAddress(hre, contract.abi, contract.address, signer) as unknown as ContractType;
     }
-    return hre.ethers.getContractAt(contract.abi, contract.address, signer);
+    return hre.ethers.getContractAt(contract.abi, contract.address, signer) as unknown as ContractType;
   }
   throw new Error(`No Deployment Plugin Installed, try 'import "harhdat-deploy"'`);
 }
